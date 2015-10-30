@@ -1,4 +1,4 @@
-module App.Model  (Game, defaultGame, Player, defaultPlayer, Pill, defaultPill, defaultRadius, defaultColor)  where
+module App.Model  (Game, defaultGame, Player, defaultPlayer, Pill, defaultPill, defaultRadius, defaultColor, isGameOver)  where
 
 import Color as C exposing (Color)
 import List exposing (..)
@@ -23,3 +23,6 @@ defaultGame : Game
 defaultGame = { score = 0
               , player = defaultPlayer
               , pills = (map (\i-> {defaultPill|pos<-(i*3*defaultPill.rad,snd defaultPill.pos)}) [0..3])}
+
+isGameOver : Game -> Bool
+isGameOver g = g.score < 0

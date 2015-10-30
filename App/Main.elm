@@ -1,7 +1,9 @@
 module App.Main where
 
--- TODO
+-- DOING 
 -- when the count falls unter 0 the game should end
+
+-- TODO
 -- i should be able to start a new game
 -- there should be levels -> quicker fall, more huddled with red
 -- the level score should be saved locally

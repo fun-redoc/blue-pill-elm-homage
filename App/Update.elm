@@ -4,9 +4,6 @@ import Signal as S exposing ((<~),(~))
 import Color as C exposing (Color)
 import Time as T exposing (Time)
 import List exposing (..)
---import AnimationFrame
---import Random
---import Text
 
 import App.Vec   exposing (..)
 import App.Const exposing (..)
@@ -26,19 +23,23 @@ stepPill t p = { p | pos <- vecAdd p.pos (vecMulS p.vel t)}
 
 stepGame : Action -> Game -> Game
 stepGame e g = 
-  case e of
-    Tick (t,mp) -> let hit pl pi = (pl.rad + pi.rad) > (vecLen <| vecSub pl.pos pi.pos)
-                       culled {rad,pos} = ((snd pos)+rad) < (-hHeight)
-                       (notHit,hitRed,hitBlue,culledBlue, culledPills) = foldl (\pil (nh,hr,hb,cb,cu) -> ( if (not (hit g.player pil)) && (not (culled pil)) then pil::nh else nh
-                                                                                    , if (hit g.player pil) && (not (culled pil)) && pil.col == C.lightRed then pil::hr else hr
-                                                                                    , if (hit g.player pil) && (not (culled pil)) && pil.col == C.lightBlue then pil::hb else hb
-                                                                                    , if (culled pil) && pil.col == C.lightBlue then pil::cb else cb
-                                                                                    , if (culled pil) then pil::cu else cu
-                                                                                  )
-                                                              ) ([],[],[],[],[]) g.pills
-                    in { g | pills <- map (stepPill t) <| notHit -- filter (\pi -> (not (hit player pi)) && (not (culled pi))) pills
-                           , player <- stepPlayer mp g.player
-                           , score <- g.score+(length hitBlue)-(length hitRed)-(length culledBlue)
-                         }
-    Add pill    -> { g | pills <- pill :: g.pills }
-    _           -> g -- DEFAULT NoOp
+  if e /= StartGame && isGameOver g 
+     then g 
+     else case e of
+            Tick (t,mp) -> let hit pl pi = (pl.rad + pi.rad) > (vecLen <| vecSub pl.pos pi.pos)
+                               culled {rad,pos} = ((snd pos)+rad) < (-hHeight)
+                               (notHit,hitRed,hitBlue,culledBlue, culledPills) = 
+                                 foldl (\pil (nh,hr,hb,cb,cu) -> ( if (not (hit g.player pil)) && (not (culled pil)) then pil::nh else nh
+                                                                  , if (hit g.player pil) && (not (culled pil)) && pil.col == C.lightRed then pil::hr else hr
+                                                                  , if (hit g.player pil) && (not (culled pil)) && pil.col == C.lightBlue then pil::hb else hb
+                                                                  , if (culled pil) && pil.col == C.lightBlue then pil::cb else cb
+                                                                  , if (culled pil) then pil::cu else cu
+                                                                )
+                                            ) ([],[],[],[],[]) g.pills
+                            in { g | pills <- map (stepPill t) <| notHit -- filter (\pi -> (not (hit player pi)) && (not (culled pi))) pills
+                                   , player <- stepPlayer mp g.player
+                                   , score <- g.score+(length hitBlue)-(length hitRed)-(length culledBlue)
+                                 }
+            Add pill    -> { g | pills <- pill :: g.pills }
+            StartGame   -> defaultGame
+            _           -> g -- DEFAULT NoOp
