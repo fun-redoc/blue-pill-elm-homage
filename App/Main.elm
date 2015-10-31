@@ -10,4 +10,4 @@ import App.Update exposing (..)
 import App.View exposing (..)
 
 -- MAIN --
-main = render <~ Window.dimensions ~ S.foldp stepGame defaultGame event
+main = render <~ Window.dimensions ~ S.foldp update defaultGameState event

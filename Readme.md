@@ -22,9 +22,12 @@ Thanks to splodingsocks.
 * i should be able to start a new game
 
 ## DOING 
+* there should be levels -> quicker fall, more huddled with red
+** recognize when level ready, thus watch for a treshold score
+** stop game and show gratulations text
+** wait for the player to press 's' to start the new level
 
 ## TODO
-* there should be levels -> quicker fall, more huddled with red
 * the level score should be saved locally
 * the red pills should fall in different velocities
 * the pills should accelerate like by gravity

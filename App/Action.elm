@@ -6,4 +6,4 @@ import App.Model exposing (Pill)
 import App.Utils exposing (..)
 
 -- ACTIONS -- 
-type Action = NoOp | Tick (Time,MousePosition) | Add Pill | Pause | StartGame
+type Action = NoOp | Tick (Time,MousePosition) | Add Pill | Pause | Resume | StartGame

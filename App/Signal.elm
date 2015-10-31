@@ -18,7 +18,7 @@ import App.Utils exposing (..)
 import App.Model exposing (..)
 import App.Action exposing (..)
 
-
+import ConsoleLog exposing (log)
 -- SIGNALS --
 --delta = T.fps 3
 spawnSignal : Signal Time
@@ -44,17 +44,23 @@ randomColor' timeSignal = S.foldp (\t m-> case m of
 randomColor : Signal Time -> Signal Color
 randomColor timeSignal = (\m->Maybe.withDefault defaultColor (Maybe.map (\(v,_)->if v >= 2 then defaultColor else C.lightBlue) m ))<~(randomColor' timeSignal)
 
-pauseOrRun : Signal Bool
-pauseOrRun = Signal.foldp (\b s-> xor b s) False Keyboard.space
+pauseOrRun : Signal Action
+pauseOrRun = (Signal.map (\b->if b then Resume else Pause) <| (Signal.foldp (\b s-> xor b s) True Keyboard.space))
 
-startGame : Signal Bool
-startGame = (Signal.map (Set.member <| Char.toCode 'S')Keyboard.keysDown)
+startGame : Signal Action
+startGame = Signal.map (\b->if b then StartGame else NoOp) (Signal.map (Set.member <| Char.toCode 'S') Keyboard.keysDown)
 
-event = Signal.map3 (\s r i -> if s then StartGame else if r then i else Pause) 
-                    startGame
-                    pauseOrRun
-                    (S.mergeMany [ Tick <~ inputSignal
-                                , Add <~ ((\maybeRandomX color-> Maybe.withDefault defaultPill 
-                                                                                    (Maybe.map (\randomX->{defaultPill| pos <- (fst randomX,snd defaultPill.pos), col<-color}) maybeRandomX)
-                                         )<~(randomXSignal  spawnSignal)~(randomColor spawnSignal))
-                                ])
+-- event = Signal.map3 (\s r i -> if s then StartGame else if r then i else Pause) 
+--                     startGame
+--                     pauseOrRun
+--                     (S.mergeMany [ Tick <~ inputSignal
+--                                 , Add <~ ((\maybeRandomX color-> Maybe.withDefault defaultPill 
+--                                                                                     (Maybe.map (\randomX->{defaultPill| pos <- (fst randomX,snd defaultPill.pos), col<-color}) maybeRandomX)
+--                                          )<~(randomXSignal  spawnSignal)~(randomColor spawnSignal))
+--                                 ])
+event = (S.mergeMany [ Tick <~ inputSignal
+                     , Add <~ ((\maybeRandomX color-> Maybe.withDefault defaultPill 
+                                                                         (Maybe.map (\randomX->{defaultPill| pos <- (fst randomX,snd defaultPill.pos), col<-color}) maybeRandomX)
+                              )<~(randomXSignal  spawnSignal)~(randomColor spawnSignal))
+                     ,log "C" <~ ((\s p-> if s == NoOp then p else s) <~ startGame ~ pauseOrRun)
+                     ])
